@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Color</title>
+        <link href='https://fonts.googleapis.com/css?family=Frijole' rel='stylesheet' type='text/css'>
+        <style>
+            *{
+                margin:0;
+                padding:0;
+                font-family: 'Frijole', cursive;
+            }
+            html,body{
+                height:100%;
+            }
+            .box{
+                height:100%;
+                display: -webkit-box;
+                display: -moz-box;
+                display: -ms-flexbox;
+                display: -webkit-flex;
+                display: flex;
+                -webkit-box-direction: normal;
+                -moz-box-direction: normal;
+                -webkit-box-orient: horizontal;
+                -moz-box-orient: horizontal;
+                -webkit-flex-direction: row;
+                -ms-flex-direction: row;
+                flex-direction: row;
+                -webkit-flex-wrap: wrap;
+                -ms-flex-wrap: wrap;
+                flex-wrap: wrap;
+                -webkit-box-pack: center;
+                -moz-box-pack: center;
+                -webkit-justify-content: center;
+                -ms-flex-pack: center;
+                justify-content: center;
+                -webkit-box-align: center;
+                -moz-box-align: center;
+                -webkit-align-items: center;
+                -ms-flex-align: center;
+                align-items: center;
+            }
+            .box div
+            {
+                width: 100px;
+                height:100px;
+                margin: 0 10px;
+            }
+            .style-4 input[type="text"] {
+                padding: 10px;
+                border: none;
+                border-bottom: solid 2px #c9c9c9;
+                transition: border 0.3s;
+                background: none;
+            }
+            .style-4 input[type="text"]:focus,
+            .style-4 input[type="text"].focus {
+                border-bottom: solid 2px #969696;
+                background: none;
+                outline: none;
+             }
+        </style>
+        <script type="text/javascript">
+            function setup()
+            {
+                var hex = document.getElementById("hex_field"),
+                    rgb = document.getElementById("rgb_field");
+                
+                RandomColor(hex, rgb);
+                
+                document.onkeydown = function(e){
+                    e = e || window.event;
+                    if(e.keyCode == 32)
+                        RandomColor(hex, rgb);
+                }    
+                    
+                hex.addEventListener("input", function(e){
+                    var input = hex.value;
+                    var regex = /(^#?[0-9A-F]{3}$)|(^#?[0-9A-F]{6}$)/;
+                    if(regex.test(input))
+                    {
+                        rgb.value = toRGB(input);
+                        ChangeBackground(hex.value);
+                        checkFontColor(hex.value);
+                    }
+                });
+                rgb.addEventListener("input", function(e){
+                   var input = rgb.value.replace(/r|g|b|\(|\)|R|G|B/g,'');
+                   
+                   var regex = /\d{1,3},\d{1,3},\d{1,3}/;
+
+                   if(regex.test(input))
+                   {
+                        hex.value = toHex(input);
+                        ChangeBackground(hex.value);
+                        checkFontColor(hex.value);
+                   }
+                });
+            }
+            
+            function RandomColor(hex, rgb)
+            {
+                var r = Math.round(Math.random()*255),
+                    g = Math.round(Math.random()*255),
+                    b = Math.round(Math.random()*255);
+                rgb.value = "rgb("+r+","+g+","+b+")";
+                hex.value = toHex(r+","+g+","+b);
+                ChangeBackground(hex.value);
+            }
+            
+            function ChangeBackground(color)
+            {
+                if(color[0] != "#")
+                    color = "#" + color;
+                document.body.style.background = color;
+            }
+            
+            function toHex(rgb)
+            {
+                var output = "#";
+                
+                var arr = rgb.replace(/ |rgb(|)/g,'').split(",");
+                
+                if( arr.length == 3)
+                {
+                    for(var i=0; i <arr.length; i++)
+                    {
+                        var hex_val = parseInt(arr[i]).toString(16).toUpperCase();
+                        hex_val = (hex_val.length == 1) ? "0"+hex_val : hex_val;
+                        output += hex_val;
+                    }
+                }
+                else
+                    output = "";
+                return output;
+            }
+            
+            function toRGB(hex)
+            {
+                var temp = hex.replace(/#| /g,"");
+                var output = "rgb(";
+                
+                temp = shortToLonghandHEX(temp);
+
+                output += parseInt(temp.substr(0,2),16) + ",";
+                output += parseInt(temp.substr(2,2), 16) + ",";
+                output += parseInt(temp.substr(4,2), 16) + ")";
+                
+                return output;                
+            }
+            
+            function shortToLonghandHEX(shortHEX)
+            {
+                return shortHEX.replace(/^#?([a-f\d])([a-f\d])([a-f\d])$/i, function(m, r, g, b){
+                    return r + r + g + g + b + b;
+                });
+            }
+            
+            function checkFontColor(bg_color)
+            {
+                bg_color = shortToLonghandHEX(bg_color.slice(1));
+                
+                var r = parseInt(bg_color.substr(0,2),16),
+                    g = parseInt(bg_color.substr(2,2),16),
+                    b = parseInt(bg_color.substr(4,2),16);
+                    
+                var yiq = ((r*299)+(g*587)+(b*114))/1000;
+                
+                var c = (yiq >= 128) ? 'black' : 'white';
+
+                var text = document.getElementsByClassName("text");
+                for(var i=0; i<text.length; i++)
+                    text[i].style.color = c;
+            }
+        </script>
+    </head>
+    <body onload="setup()">
+        <h1 class="text" style="position:absolute;">Color</h1>
+        <div class="box style-4">
+            <div>
+                <input type="text" placeholder="hex" value="#FFFFFF" id="hex_field" class="text"/>
+                <br/><br/>
+                <input type="text" placeholder="rgb" value="rgb(255,255,255)" id="rgb_field" class="text"/>
+            </div>
+        </div>
+    </body>
+</html>
